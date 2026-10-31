@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="hi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialSuite All-in-One</title>
+    <!-- PWA Web App Meta Tags -->
+    <meta name="theme-color" content="#0866FF">
+    <meta name="description" content="All-in-One Social Media Launcher with 100% Privacy & Security Guarantee">
+    <link rel="manifest" href="data:application/json,{\"name\":\"SocialHub Pro\",\"short_name\":\"SocialHub\",\"start_url\":\".\",\"display\":\"standalone\",\"background_color\":\"#111827\",\"theme_color\":\"#0866FF\"}">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        fb: '#0866FF',
+                        insta: '#E1306C',
+                        yt: '#FF0000',
+                        msg: '#0084FF',
+                        wa: '#25D366',
+                        threads: '#000000'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.7); }
+        .insta-gradient { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col md:flex-row overflow-hidden select-none">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 bg-gray-800 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-gray-700 pointer-events-none">
+        <i id="toast-icon" class="fas font-bold text-lg"></i>
+        <span id="toast-message" class="text-sm font-medium">Notification</span>
+    </div>
+
+    <!-- FLOATING SIDEBAR TOGGLE BUTTON (For Mobile & Quick Hover Access) -->
+    <button onclick="toggleSidebarForce()" class="fixed top-3 left-3 z-40 bg-gradient-to-r from-blue-600 to-indigo-600 text-white w-10 h-10 rounded-xl shadow-lg flex items-center justify-center hover:scale-105 transition" title="Open Apps Panel">
+        <i class="fa-solid fa-bars text-lg"></i>
+    </button>
+
+    <!-- AUTO-HIDING COLLAPSIBLE SIDEBAR NAVIGATION -->
+    <aside id="main-sidebar" 
+           onmouseenter="expandSidebar()" 
+           onmouseleave="collapseSidebar()" 
+           class="fixed md:absolute top-0 left-0 h-full w-64 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-r border-gray-200 dark:border-gray-700 flex flex-col justify-between z-40 shrink-0 transform -translate-x-full hover:translate-x-0 transition-transform duration-300 shadow-2xl">
+        <div>
+            <!-- App Brand Header -->
+            <div class="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-purple-600 to-pink-500 flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                        <i class="fa-solid fa-cubes"></i>
+                    </div>
+                    <span class="font-bold text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500">SocialHub Pro</span>
+                </div>
+                <button onclick="toggleTheme()" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline text-yellow-400"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="p-2 space-y-1 flex flex-col overflow-y-auto">
+                <button onclick="switchTab('facebook')" id="nav-facebook" class="nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl font-medium transition text-blue-600 bg-blue-50 dark:bg-blue-900/30">
+                    <i class="fa-brands fa-facebook text-2xl"></i>
+                    <span>Facebook</span>
+                    <span id="badge-facebook" class="ml-auto text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold">12</span>
+                </button>
+
+                <button onclick="switchTab('instagram')" id="nav-instagram" class="nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl font-medium transition text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700/50">
+                    <i class="fa-brands fa-instagram text-2xl text-pink-500"></i>
+                    <span>Instagram</span>
+                    <span id="badge-instagram" class="ml-auto text-xs bg-pink-500 text-white px-2 py-0.5 rounded-full font-bold">5</span>
+                </button>
+
+                <button onclick="switchTab('messenger')" id="nav-messenger" class="nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl font-medium transition text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700/50">
+                    <i class="fa-brands fa-facebook-messenger text-2xl text-blue-500"></i>
+                    <span>Messenger</span>
+                    <span id="badge-messenger" class="ml-auto text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold">3</span>
+                </button>
+
+                <button onclick="switchTab('youtube')" id="nav-youtube" class="nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl font-medium transition text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700/50">
+                    <i class="fa-brands fa-youtube text-2xl text-red-600"></i>
+                    <span>YouTube</span>
+                </button>
+
+                <button onclick="switchTab('whatsapp')" id="nav-whatsapp" class="nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl font-medium transition text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700/50">
+                    <i class="fa-brands fa-whatsapp text-2xl text-emerald-500"></i>
+                    <span>WhatsApp</span>
+                    <span id="badge-whatsapp" class="ml-auto text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold">8</span>
+                </button>
+
+                <button onclick="switchTab('threads')" id="nav-threads" class="nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl font-medium transition text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700/50">
+                    <i class="fa-brands fa-threads text-2xl"></i>
+                    <span>Threads</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- App Install & Privacy Assurance Box -->
+        <div class="p-3 border-t border-gray-200 dark:border-gray-700">
+            <button id="pwa-install-btn" onclick="installApp()" class="w-full mb-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-2 rounded-xl text-xs font-bold shadow flex items-center justify-center gap-2">
+                <i class="fa-solid fa-download"></i> Install App
+            </button>
+            <div class="text-[10px] text-gray-400 text-center leading-tight flex items-center justify-center gap-1">
+                <i class="fa-solid fa-shield-halved text-green-500"></i>
+                <span>100% Safe • Zero Data Stored</span>
+            </div>
+        </div>
+
+        <!-- User Profile Quick Bar bottom sidebar -->
+        <div class="p-3 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                <div class="flex items-center gap-3 overflow-hidden" id="user-sidebar-profile">
+                    <div class="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 border-2 border-dashed border-gray-400">
+                        <i class="fa-solid fa-user text-sm"></i>
+                    </div>
+                    <div class="leading-tight truncate">
+                        <p class="font-bold text-sm truncate" id="sidebar-user-name">Guest User</p>
+                        <p class="text-xs text-amber-500 font-semibold truncate" id="sidebar-user-status">Logged Out</p>
+                    </div>
+                </div>
+                <button onclick="logoutCurrentPlatform()" title="Log Out Active Session" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTENT AREA CONTAINER -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50 dark:bg-gray-900 w-full">
+        
+        <!-- TOP HEADER BAR -->
+        <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 pl-16 z-10 shrink-0">
+            <!-- Global Search -->
+            <div class="relative w-48 sm:w-80 md:w-96">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" placeholder="Sabhi apps me search karein..." class="w-full pl-9 pr-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-2 md:gap-4">
+                <div id="platform-status-badge" class="hidden sm:flex items-center gap-2 px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-bold border border-green-500/20">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span id="active-app-label">Facebook Active</span>
+                </div>
+                <button onclick="openCreateModal()" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-2 rounded-xl text-xs md:text-sm font-semibold hover:opacity-90 shadow-md transition">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="hidden sm:inline">Post/Status Banayein</span>
+                </button>
+                <button onclick="showToast('Notification center synced!', 'fa-bell text-blue-400')" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 relative">
+                    <i class="fa-solid fa-bell text-lg"></i>
+                    <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-800"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Panels (Clean Full-Screen View) -->
+        <div class="flex-1 overflow-y-auto relative p-2 md:p-6" id="app-view-container">
+
+            <!-- ================= FACEBOOK LOGIN & PANEL ================= -->
+            <section id="view-facebook" class="app-view max-w-3xl mx-auto space-y-4">
+                <!-- LOGIN SCREEN FOR FACEBOOK -->
+                <div id="login-facebook" class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 max-w-md mx-auto my-10 space-y-6 text-center">
+                    <div class="flex flex-col items-center gap-2">
+                        <i class="fa-brands fa-facebook text-6xl text-blue-600"></i>
+                        <h2 class="text-2xl font-bold tracking-tight">Log Into Facebook</h2>
+                        <p class="text-xs text-gray-400">Apne Official Facebook account se Connect Karein</p>
+                    </div>
+                    <form onsubmit="handlePlatformLogin(event, 'facebook')" class="space-y-4 text-left">
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 mb-1 block">Email address or Phone Number</label>
+                            <input type="text" id="fb-user-input" required placeholder="Mobile number or email" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 mb-1 block">Password</label>
+                            <input type="password" required placeholder="Enter password" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-lock"></i> Official Real Facebook Login
+                        </button>
+                    </form>
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
+                        <span class="flex-shrink mx-4 text-gray-400 text-xs">OR DIRECT WEB PORTAL</span>
+                        <div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
+                    </div>
+                    <a href="https://www.facebook.com/login" target="_blank" class="w-full block bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 font-semibold py-2.5 rounded-xl text-xs shadow border border-blue-200 dark:border-blue-800 hover:bg-blue-100 transition">
+                        <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> Open Real Facebook Site (Secure Tab)
+                    </a>
+                </div>
+
+                <!-- MAIN FACEBOOK CONTENT (Hidden until logged in) -->
+                <div id="content-facebook" class="hidden space-y-4">
+                    <div class="flex justify-between items-center bg-blue-500/10 p-3 rounded-xl border border-blue-500/20 text-xs font-semibold text-blue-600 dark:text-blue-400">
+                        <span><i class="fa-solid fa-user-check mr-2"></i> Connected User: <b id="display-fb-name">Real User Account</b></span>
+                        <button onclick="logoutPlatform('facebook')" class="underline hover:text-red-500">Log Out</button>
+                    </div>
+
+                    <!-- Stories Bar -->
+                    <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex gap-3 overflow-x-auto">
+                        <div class="relative w-24 h-40 rounded-xl overflow-hidden shrink-0 group cursor-pointer border border-gray-200 dark:border-gray-700">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80" class="h-28 w-full object-cover">
+                            <div class="absolute bottom-0 w-full h-12 bg-white dark:bg-gray-800 flex flex-col items-center justify-end pb-1">
+                                <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800 -top-4 absolute">
+                                    <i class="fa-solid fa-plus text-xs"></i>
+                                </div>
+                                <span class="text-[10px] font-bold">Add Story</span>
+                            </div>
+                        </div>
+                        <div class="relative w-24 h-40 rounded-xl overflow-hidden shrink-0 cursor-pointer group">
+                            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <div class="absolute top-2 left-2 w-8 h-8 rounded-full border-2 border-blue-600 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+                            </div>
+                            <span class="absolute bottom-2 left-2 text-white text-xs font-semibold drop-shadow">Rahul Kumar</span>
+                        </div>
+                        <div class="relative w-24 h-40 rounded-xl overflow-hidden shrink-0 cursor-pointer group">
+                            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <div class="absolute top-2 left-2 w-8 h-8 rounded-full border-2 border-blue-600 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+                            </div>
+                            <span class="absolute bottom-2 left-2 text-white text-xs font-semibold drop-shadow">Neha Singh</span>
+                        </div>
+                    </div>
+
+                    <!-- Create Post Input Box -->
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center gap-3">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" class="w-10 h-10 rounded-full object-cover">
+                            <input onclick="openCreateModal()" type="text" placeholder="Kya soch rahe hain aap, Priya?" class="w-full bg-gray-100 dark:bg-gray-700 px-4 py-2.5 rounded-full text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                        </div>
+                        <div class="flex justify-between border-t border-gray-100 dark:border-gray-700 mt-3 pt-3 text-xs md:text-sm font-semibold text-gray-500">
+                            <button class="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-xl flex-1 justify-center text-red-500"><i class="fa-solid fa-video text-lg"></i> Live Video</button>
+                            <button class="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-xl flex-1 justify-center text-green-500"><i class="fa-solid fa-images text-lg"></i> Photo/video</button>
+                            <button class="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-xl flex-1 justify-center text-yellow-500"><i class="fa-solid fa-face-smile text-lg"></i> Feeling</button>
+                        </div>
+                    </div>
+
+                    <!-- Facebook Feed Post -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80" class="w-10 h-10 rounded-full object-cover">
+                                <div>
+                                    <h4 class="font-bold text-sm">Tech News India <i class="fa-solid fa-circle-check text-blue-500 text-xs"></i></h4>
+                                    <p class="text-xs text-gray-400">2 hrs ago • <i class="fa-solid fa-globe"></i></p>
+                                </div>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-ellipsis-h"></i></button>
+                        </div>
+                        <p class="text-sm">Naya Smartphone Launch ho gaya hai! Isme amazing features and AI capabilities di gayi hain. Aap sabka kya khayal hai?</p>
+                        <div class="rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700">
+                            <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=80" class="w-full max-h-96 object-cover">
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-gray-400 pt-1">
+                            <span><i class="fa-solid fa-thumbs-up text-blue-500"></i> 1.2K Likes</span>
+                            <span>450 Comments • 89 Shares</span>
+                        </div>
+                        <div class="flex justify-around border-t border-b border-gray-100 dark:border-gray-700 py-1 text-sm font-semibold text-gray-500">
+                            <button onclick="toggleLike(this)" class="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 py-2 px-4 rounded-xl flex-1 justify-center transition"><i class="fa-regular fa-thumbs-up"></i> Like</button>
+                            <button class="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 py-2 px-4 rounded-xl flex-1 justify-center transition"><i class="fa-regular fa-comment"></i> Comment</button>
+                            <button class="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 py-2 px-4 rounded-xl flex-1 justify-center transition"><i class="fa-solid fa-share"></i> Share</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= INSTAGRAM LOGIN & PANEL ================= -->
+            <section id="view-instagram" class="app-view hidden max-w-xl mx-auto space-y-4">
+                <!-- INSTAGRAM LOGIN SCREEN -->
+                <div id="login-instagram" class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 max-w-md mx-auto my-10 space-y-6 text-center">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-16 h-16 rounded-2xl p-0.5 insta-gradient flex items-center justify-center text-white text-3xl shadow-md">
+                            <i class="fa-brands fa-instagram"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold tracking-tight">Instagram</h2>
+                        <p class="text-xs text-gray-400">Official Instagram account se log in karein</p>
+                    </div>
+                    <form onsubmit="handlePlatformLogin(event, 'instagram')" class="space-y-4 text-left">
+                        <div>
+                            <input type="text" id="insta-user-input" required placeholder="Phone number, username, or email" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        </div>
+                        <div>
+                            <input type="password" required placeholder="Password" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 rounded-xl shadow-lg hover:opacity-90 transition">Log In</button>
+                    </form>
+                    <a href="https://www.instagram.com/accounts/login/" target="_blank" class="w-full block bg-pink-50 dark:bg-pink-900/40 text-pink-600 dark:text-pink-300 font-semibold py-2.5 rounded-xl text-xs border border-pink-200 dark:border-pink-800 hover:bg-pink-100 transition">
+                        <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> Open Real Instagram Official Portal
+                    </a>
+                </div>
+                    <form onsubmit="handlePlatformLogin(event, 'instagram')" class="space-y-4 text-left">
+                        <div>
+                            <input type="text" required placeholder="Phone number, username, or email" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        </div>
+                        <div>
+                            <input type="password" required placeholder="Password" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 rounded-xl shadow-lg hover:opacity-90 transition">Log In</button>
+                    </form>
+                    <button onclick="quickLogin('instagram')" class="w-full bg-gray-700 text-white font-semibold py-2.5 rounded-xl text-xs shadow hover:bg-gray-600 transition">
+                        <i class="fa-solid fa-bolt mr-2"></i> Demo Quick Login
+                    </button>
+                </div>
+
+                <!-- INSTAGRAM CONTENT -->
+                <div id="content-instagram" class="hidden space-y-4">
+                    <div class="flex justify-between items-center bg-pink-500/10 p-3 rounded-xl border border-pink-500/20 text-xs font-semibold text-pink-600 dark:text-pink-400">
+                        <span><i class="fa-solid fa-user-check mr-2"></i> Logged in as <b>@priya_official</b></span>
+                        <button onclick="logoutPlatform('instagram')" class="underline hover:text-red-500">Log Out</button>
+                    </div>
+                    <!-- Insta Stories -->
+                    <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl border border-gray-200 dark:border-gray-700 flex gap-4 overflow-x-auto items-center">
+                        <div class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
+                            <div class="w-16 h-16 rounded-full p-[2px] bg-gray-300 relative">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" class="w-full h-full rounded-full object-cover">
+                                <span class="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">+</span>
+                            </div>
+                            <span class="text-[11px]">Your story</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
+                            <div class="w-16 h-16 rounded-full p-[2px] insta-gradient">
+                                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&auto=format&fit=crop&q=80" class="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-800">
+                            </div>
+                            <span class="text-[11px]">aanya_p</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
+                            <div class="w-16 h-16 rounded-full p-[2px] insta-gradient">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" class="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-800">
+                            </div>
+                            <span class="text-[11px]">vikram_v</span>
+                        </div>
+                    </div>
+
+                    <!-- Instagram Post -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="flex items-center justify-between p-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full p-[1.5px] insta-gradient">
+                                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" class="w-full h-full rounded-full object-cover border border-white dark:border-gray-800">
+                                </div>
+                                <span class="font-bold text-sm">sara_explorer</span>
+                            </div>
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&auto=format&fit=crop&q=80" class="w-full aspect-square object-cover">
+                        <div class="p-3 space-y-2">
+                            <div class="flex justify-between text-xl">
+                                <div class="flex gap-4">
+                                    <button onclick="toggleInstaLike(this)"><i class="fa-regular fa-heart hover:text-red-500 transition"></i></button>
+                                    <button><i class="fa-regular fa-comment hover:text-gray-500"></i></button>
+                                    <button><i class="fa-regular fa-paper-plane hover:text-gray-500"></i></button>
+                                </div>
+                                <button><i class="fa-regular fa-bookmark hover:text-yellow-500"></i></button>
+                            </div>
+                            <p class="font-bold text-sm">3,420 likes</p>
+                            <p class="text-sm"><span class="font-bold">sara_explorer</span> Mountain trip with best friends! 🏔️✨ #Wanderlust #Nature</p>
+                            <p class="text-xs text-gray-400">View all 182 comments</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= YOUTUBE LOGIN & PANEL ================= -->
+            <section id="view-youtube" class="app-view hidden max-w-5xl mx-auto space-y-6">
+                <!-- YOUTUBE LOGIN SCREEN -->
+                <div id="login-youtube" class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 max-w-md mx-auto my-10 space-y-6 text-center">
+                    <div class="flex flex-col items-center gap-2">
+                        <i class="fa-brands fa-youtube text-6xl text-red-600"></i>
+                        <h2 class="text-2xl font-bold tracking-tight">Sign in to YouTube</h2>
+                        <p class="text-xs text-gray-400">Sign in with your Google Account</p>
+                    </div>
+                    <form onsubmit="handlePlatformLogin(event, 'youtube')" class="space-y-4 text-left">
+                        <div>
+                            <input type="email" required placeholder="Email or phone" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                        <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-red-700 transition">Sign In</button>
+                    </form>
+                    <button onclick="quickLogin('youtube')" class="w-full bg-gray-700 text-white font-semibold py-2.5 rounded-xl text-xs shadow hover:bg-gray-600 transition">
+                        <i class="fa-solid fa-bolt mr-2"></i> Quick Demo Sign In
+                    </button>
+                </div>
+
+                <!-- YOUTUBE CONTENT -->
+                <div id="content-youtube" class="hidden space-y-6">
+                    <div class="flex justify-between items-center bg-red-500/10 p-3 rounded-xl border border-red-500/20 text-xs font-semibold text-red-600 dark:text-red-400">
+                        <span><i class="fa-solid fa-user-check mr-2"></i> Account: <b>Priya Tech Reviews</b></span>
+                        <button onclick="logoutPlatform('youtube')" class="underline hover:text-red-500">Sign Out</button>
+                    </div>
+                    <!-- Video Categories Filter -->
+                    <div class="flex gap-2 overflow-x-auto pb-2">
+                        <button class="bg-black text-white dark:bg-white dark:text-black px-4 py-1.5 rounded-lg text-sm font-semibold shrink-0">All</button>
+                        <button class="bg-gray-200 dark:bg-gray-800 px-4 py-1.5 rounded-lg text-sm font-semibold shrink-0 hover:bg-gray-300 dark:hover:bg-gray-700">Gaming</button>
+                        <button class="bg-gray-200 dark:bg-gray-800 px-4 py-1.5 rounded-lg text-sm font-semibold shrink-0 hover:bg-gray-300 dark:hover:bg-gray-700">Music</button>
+                        <button class="bg-gray-200 dark:bg-gray-800 px-4 py-1.5 rounded-lg text-sm font-semibold shrink-0 hover:bg-gray-300 dark:hover:bg-gray-700">Technology</button>
+                        <button class="bg-gray-200 dark:bg-gray-800 px-4 py-1.5 rounded-lg text-sm font-semibold shrink-0 hover:bg-gray-300 dark:hover:bg-gray-700">Live</button>
+                    </div>
+
+                    <!-- Video Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div onclick="playVideo('Build Web Apps Fast', 'CodeWithMe')" class="cursor-pointer space-y-2 group">
+                            <div class="relative rounded-2xl overflow-hidden aspect-video">
+                                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                <span class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-0.5 rounded font-mono">14:20</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80" class="w-9 h-9 rounded-full object-cover">
+                                <div>
+                                    <h3 class="font-bold text-sm line-clamp-2 leading-snug">Full Web Development Course 2026 - Modern Frontend</h3>
+                                    <p class="text-xs text-gray-400 mt-1">CodeWithMe • 250K views • 3 days ago</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div onclick="playVideo('Unboxing AI Gadgets', 'TechZone')" class="cursor-pointer space-y-2 group">
+                            <div class="relative rounded-2xl overflow-hidden aspect-video">
+                                <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                <span class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-0.5 rounded font-mono">08:45</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=80" class="w-9 h-9 rounded-full object-cover">
+                                <div>
+                                    <h3 class="font-bold text-sm line-clamp-2 leading-snug">Top 5 Insane Future Tech Gadgets You Can Buy Now</h3>
+                                    <p class="text-xs text-gray-400 mt-1">TechZone • 1.1M views • 1 week ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= MESSENGER LOGIN & PANEL ================= -->
+            <section id="view-messenger" class="app-view hidden max-w-4xl mx-auto h-[75vh] flex rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
+                <!-- MESSENGER LOGIN SCREEN -->
+                <div id="login-messenger" class="w-full bg-white dark:bg-gray-800 p-8 rounded-3xl max-w-md mx-auto my-auto space-y-6 text-center">
+                    <div class="flex flex-col items-center gap-2">
+                        <i class="fa-brands fa-facebook-messenger text-6xl text-blue-500 animate-bounce"></i>
+                        <h2 class="text-2xl font-bold tracking-tight">Messenger Web</h2>
+                        <p class="text-xs text-gray-400">Connect with your friends & family instantly</p>
+                    </div>
+                    <form onsubmit="handlePlatformLogin(event, 'messenger')" class="space-y-4 text-left">
+                        <div>
+                            <input type="text" required placeholder="Email or Phone Number" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <input type="password" required placeholder="Messenger Password" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-600 transition">Log In to Messenger</button>
+                    </form>
+                    <button onclick="quickLogin('messenger')" class="w-full bg-blue-600/10 text-blue-600 font-bold py-2.5 rounded-xl text-xs border border-blue-500/20 hover:bg-blue-500 hover:text-white transition">
+                        <i class="fa-solid fa-bolt mr-2"></i> Quick Login (Priya Sharma)
+                    </button>
+                </div>
+
+                <!-- MESSENGER CONTENT WORKSPACE -->
+                <div id="content-messenger" class="hidden w-full h-full flex">
+                    <!-- Chat List Left Sidebar -->
+                    <div class="w-full sm:w-80 border-r border-gray-200 dark:border-gray-700 flex flex-col bg-gray-50/50 dark:bg-gray-800">
+                        <div class="p-3 border-b border-gray-200 dark:border-gray-700 font-bold text-lg flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-brands fa-facebook-messenger text-blue-500"></i>
+                                <span>Messenger Chats</span>
+                            </div>
+                            <button onclick="logoutPlatform('messenger')" title="Logout Messenger" class="text-xs text-red-500 font-normal hover:underline">Log Out</button>
+                        </div>
+                        <div class="overflow-y-auto flex-1 divide-y divide-gray-100 dark:divide-gray-700/50">
+                            <!-- Active Chat 1 -->
+                            <div onclick="openMessengerChat('Amit Verma', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80')" class="p-3 flex items-center gap-3 hover:bg-blue-50 dark:hover:bg-gray-700/50 cursor-pointer bg-blue-50/50 dark:bg-gray-700">
+                                <div class="relative">
+                                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80" class="w-12 h-12 rounded-full object-cover">
+                                    <span class="w-3.5 h-3.5 bg-green-500 rounded-full absolute bottom-0 right-0 border-2 border-white dark:border-gray-800"></span>
+                                </div>
+                                <div class="flex-1 overflow-hidden">
+                                    <h4 class="font-bold text-sm">Amit Verma</h4>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">Bhai kal milte hain chai par!</p>
+                                </div>
+                            </div>
+                            <!-- Active Chat 2 -->
+                            <div onclick="openMessengerChat('Sneha Kapoor', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80')" class="p-3 flex items-center gap-3 hover:bg-blue-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <div class="relative">
+                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" class="w-12 h-12 rounded-full object-cover">
+                                    <span class="w-3.5 h-3.5 bg-green-500 rounded-full absolute bottom-0 right-0 border-2 border-white dark:border-gray-800"></span>
+                                </div>
+                                <div class="flex-1 overflow-hidden">
+                                    <h4 class="font-bold text-sm">Sneha Kapoor</h4>
+                                    <p class="text-xs text-gray-400 truncate">Project files send kar diye hain 👍</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Area Right -->
+                    <div class="hidden sm:flex flex-1 flex-col justify-between bg-gray-100/50 dark:bg-gray-900">
+                        <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <img id="msg-header-img" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80" class="w-9 h-9 rounded-full object-cover">
+                                <div>
+                                    <h4 class="font-bold text-sm" id="msg-chat-name">Amit Verma</h4>
+                                    <span class="text-xs text-green-500 font-medium">Active now</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 text-blue-500 text-lg">
+                                <button onclick="showToast('Calling...', 'fa-phone text-blue-500')" title="Audio Call"><i class="fa-solid fa-phone cursor-pointer hover:scale-110 transition"></i></button>
+                                <button onclick="showToast('Video Call starting...', 'fa-video text-blue-500')" title="Video Call"><i class="fa-solid fa-video cursor-pointer hover:scale-110 transition"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Chat Box Body -->
+                        <div id="msg-chat-body" class="p-4 flex-1 overflow-y-auto space-y-3">
+                            <div class="flex gap-2">
+                                <div class="bg-white dark:bg-gray-700 text-sm p-3 rounded-2xl rounded-bl-none max-w-xs shadow-sm">
+                                    Aur bhai, kya haal hain?
+                                </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <div class="bg-blue-600 text-white text-sm p-3 rounded-2xl rounded-br-none max-w-xs shadow-sm">
+                                    Sab badhiya! Tu bata.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Input -->
+                        <div class="p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-plus text-blue-500 text-xl cursor-pointer"></i>
+                            <input id="msg-input" onkeypress="if(event.key==='Enter') sendMsg()" type="text" placeholder="Messenger me message likhein..." class="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-2 text-sm focus:outline-none">
+                            <i onclick="sendMsg()" class="fa-solid fa-paper-plane text-blue-500 text-xl cursor-pointer hover:scale-110 transition"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= WHATSAPP LOGIN & PANEL ================= -->
+            <section id="view-whatsapp" class="app-view hidden max-w-4xl mx-auto h-full flex rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl">
+                <!-- WHATSAPP LOGIN SCREEN (QR & Phone Login) -->
+                <div id="login-whatsapp" class="w-full bg-white dark:bg-gray-800 p-8 rounded-3xl max-w-md mx-auto my-auto space-y-6 text-center">
+                    <div class="flex flex-col items-center gap-2">
+                        <i class="fa-brands fa-whatsapp text-6xl text-emerald-500"></i>
+                        <h2 class="text-2xl font-bold tracking-tight">WhatsApp Web Sync</h2>
+                        <p class="text-xs text-gray-400">Apne Phone WhatsApp Web se Real-Time Sync Karein</p>
+                    </div>
+                    <a href="https://web.whatsapp.com" target="_blank" class="w-full block bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-emerald-600 transition">
+                        <i class="fa-solid fa-qrcode mr-2"></i> Open Official WhatsApp Web (QR Scanner)
+                    </a>
+                    <button onclick="quickLogin('whatsapp')" class="w-full bg-gray-700 text-white font-semibold py-2.5 rounded-xl text-xs shadow hover:bg-gray-600 transition">
+                        <i class="fa-solid fa-bolt mr-2"></i> Standalone Web View Launch
+                    </button>
+                </div>
+
+                <!-- WHATSAPP CONTENT -->
+                <div id="content-whatsapp" class="hidden w-full h-full flex">
+                    <!-- WhatsApp Left Sidebar -->
+                    <div class="w-full sm:w-80 border-r border-gray-200 dark:border-gray-700 flex flex-col bg-emerald-950/10">
+                        <div class="p-4 bg-emerald-600 text-white font-bold flex justify-between items-center">
+                            <span>WhatsApp</span>
+                            <div class="flex gap-4 text-sm items-center">
+                                <i class="fa-solid fa-camera"></i>
+                                <button onclick="logoutPlatform('whatsapp')" title="Logout"><i class="fa-solid fa-power-off text-red-200 hover:text-white"></i></button>
+                            </div>
+                        </div>
+                        <div id="wa-chat-list" class="overflow-y-auto flex-1 divide-y divide-gray-100 dark:divide-gray-700/50">
+                            <div onclick="openWaChat('Family Group', 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=100&auto=format&fit=crop&q=80')" class="p-3 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer">
+                                <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=100&auto=format&fit=crop&q=80" class="w-12 h-12 rounded-full object-cover">
+                                <div class="flex-1 overflow-hidden">
+                                    <div class="flex justify-between items-center">
+                                        <h4 class="font-bold text-sm">Family Group 👨‍👩‍👧‍👦</h4>
+                                        <span class="text-[10px] text-emerald-500 font-bold">10:42 AM</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400 truncate"><i class="fa-solid fa-check-double text-blue-400"></i> Papa: Good Morning Everyone!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp Chat Right Panel -->
+                    <div class="hidden sm:flex flex-1 flex-col justify-between bg-emerald-50/20 dark:bg-gray-950">
+                        <div class="p-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <img id="wa-header-img" src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=100&auto=format&fit=crop&q=80" class="w-9 h-9 rounded-full object-cover">
+                                <div>
+                                    <h4 id="wa-header-name" class="font-bold text-sm">Family Group 👨‍👩‍👧‍👦</h4>
+                                    <span class="text-[10px] text-gray-400">online</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 text-gray-600 dark:text-gray-300">
+                                <i class="fa-solid fa-video cursor-pointer"></i>
+                                <i class="fa-solid fa-phone cursor-pointer"></i>
+                            </div>
+                        </div>
+
+                        <!-- Chat Area -->
+                        <div id="wa-chat-body" class="p-4 flex-1 overflow-y-auto space-y-3">
+                            <div class="flex justify-center"><span class="bg-amber-100 dark:bg-gray-800 text-amber-800 dark:text-amber-300 text-[10px] px-3 py-1 rounded-md shadow-sm">🔒 Messages are end-to-end encrypted</span></div>
+                            <div class="flex gap-2">
+                                <div class="bg-white dark:bg-gray-800 text-sm p-2.5 rounded-lg shadow-sm max-w-xs">
+                                    Good Morning Everyone!
+                                    <span class="block text-[9px] text-right text-gray-400">10:42 AM</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WhatsApp Input Bar -->
+                        <div class="p-3 bg-gray-100 dark:bg-gray-800 flex items-center gap-2">
+                            <i class="fa-regular fa-face-smile text-gray-500 text-xl cursor-pointer"></i>
+                            <input id="wa-input" onkeypress="if(event.key==='Enter') sendWaMsg()" type="text" placeholder="Message..." class="flex-1 bg-white dark:bg-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none">
+                            <button onclick="sendWaMsg()" class="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow"><i class="fa-solid fa-paper-plane text-sm"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= THREADS LOGIN & PANEL ================= -->
+            <section id="view-threads" class="app-view hidden max-w-xl mx-auto space-y-4">
+                <!-- THREADS LOGIN SCREEN -->
+                <div id="login-threads" class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 max-w-md mx-auto my-10 space-y-6 text-center">
+                    <div class="flex flex-col items-center gap-2">
+                        <i class="fa-brands fa-threads text-6xl text-black dark:text-white"></i>
+                        <h2 class="text-2xl font-bold tracking-tight">Threads</h2>
+                        <p class="text-xs text-gray-400">Log in with your Instagram account</p>
+                    </div>
+                    <button onclick="quickLogin('threads')" class="w-full bg-black text-white dark:bg-white dark:text-black font-bold py-3 rounded-xl shadow-lg hover:opacity-90 transition">
+                        Continue with Instagram (@priya_official)
+                    </button>
+                </div>
+
+                <!-- THREADS CONTENT -->
+                <div id="content-threads" class="hidden space-y-4">
+                    <div class="flex justify-between items-center bg-gray-500/10 p-3 rounded-xl border border-gray-500/20 text-xs font-semibold">
+                        <span><i class="fa-solid fa-user-check mr-2"></i> Logged in as <b>@priya_official</b></span>
+                        <button onclick="logoutPlatform('threads')" class="underline hover:text-red-500">Log Out</button>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 space-y-3">
+                        <div class="flex justify-between">
+                            <div class="flex items-center gap-3">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" class="w-9 h-9 rounded-full object-cover">
+                                <div>
+                                    <h4 class="font-bold text-sm">Priya Sharma <i class="fa-solid fa-circle-check text-black dark:text-white text-xs"></i></h4>
+                                    <span class="text-xs text-gray-400">@priya_official</span>
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400">1h</span>
+                        </div>
+                        <p class="text-sm">Threads App par swagat hai sabka! Ekdam clean and smooth experience. ✨🧵</p>
+                        <div class="flex gap-4 text-gray-500 text-lg pt-2">
+                            <i class="fa-regular fa-heart hover:text-red-500 cursor-pointer"></i>
+                            <i class="fa-regular fa-comment hover:text-blue-500 cursor-pointer"></i>
+                            <i class="fa-solid fa-arrows-rotate hover:text-green-500 cursor-pointer"></i>
+                            <i class="fa-regular fa-paper-plane hover:text-purple-500 cursor-pointer"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- CREATE POST/STATUS MODAL -->
+    <div id="create-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h3 class="font-bold text-lg">Cross-Platform Content Post</h3>
+                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 space-y-4">
+                <textarea id="modal-text" rows="4" placeholder="Apna post/status likhein..." class="w-full bg-gray-100 dark:bg-gray-700 p-3 rounded-xl text-sm focus:outline-none"></textarea>
+                
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-400 uppercase">Post Target Apps Select Karein:</label>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/40 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800 text-xs font-semibold cursor-pointer">
+                            <input type="checkbox" checked class="accent-blue-600"> Facebook
+                        </label>
+                        <label class="flex items-center gap-2 bg-pink-50 dark:bg-pink-900/40 px-3 py-1.5 rounded-lg border border-pink-200 dark:border-pink-800 text-xs font-semibold cursor-pointer">
+                            <input type="checkbox" checked class="accent-pink-600"> Instagram
+                        </label>
+                        <label class="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/40 px-3 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 text-xs font-semibold cursor-pointer">
+                            <input type="checkbox" checked class="accent-emerald-600"> WhatsApp Status
+                        </label>
+                    </div>
+                </div>
+
+                <button onclick="publishPost()" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-md hover:opacity-95 transition">Publish Karein</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Auto-Hide Sidebar Drawer Logic
+        const sidebar = document.getElementById('main-sidebar');
+
+        function expandSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+        }
+
+        function collapseSidebar() {
+            sidebar.classList.add('-translate-x-full');
+        }
+
+        function toggleSidebarForce() {
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        // Store login states for each platform (Clean Initial State)
+        const authState = {
+            facebook: false,
+            instagram: false,
+            youtube: false,
+            messenger: false,
+            whatsapp: false,
+            threads: false
+        };
+
+        let currentActiveTab = 'facebook';
+
+        // Update UI state for login/content
+        function updatePlatformAuthState(platform) {
+            const loginEl = document.getElementById(`login-${platform}`);
+            const contentEl = document.getElementById(`content-${platform}`);
+            const badgeEl = document.getElementById(`badge-${platform}`);
+
+            if (authState[platform]) {
+                if (loginEl) loginEl.classList.add('hidden');
+                if (contentEl) contentEl.classList.remove('hidden');
+                if (badgeEl) badgeEl.innerText = "Online";
+                
+                document.getElementById('sidebar-user-name').innerText = "My Account";
+                document.getElementById('sidebar-user-status').innerText = "Connected";
+                document.getElementById('sidebar-user-status').className = "text-xs text-green-500 font-semibold truncate";
+            } else {
+                if (loginEl) loginEl.classList.remove('hidden');
+                if (contentEl) contentEl.classList.add('hidden');
+                if (badgeEl) badgeEl.innerText = "Logged Out";
+                
+                document.getElementById('sidebar-user-name').innerText = "Guest User";
+                document.getElementById('sidebar-user-status').innerText = "Logged Out";
+                document.getElementById('sidebar-user-status').className = "text-xs text-amber-500 font-semibold truncate";
+            }
+            
+            // Update top bar label if current active platform
+            if (currentActiveTab === platform) {
+                const label = document.getElementById('active-app-label');
+                const badge = document.getElementById('platform-status-badge');
+                if (authState[platform]) {
+                    label.innerText = `${platform.toUpperCase()} Active`;
+                    badge.className = "hidden sm:flex items-center gap-2 px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-bold border border-green-500/20";
+                } else {
+                    label.innerText = `${platform.toUpperCase()} Login Required`;
+                    badge.className = "hidden sm:flex items-center gap-2 px-3 py-1 bg-amber-500/10 text-amber-500 rounded-full text-xs font-bold border border-amber-500/20";
+                }
+            }
+        }
+
+        // Handle Login Submission (Saves Actual Entered User Credentials to Active Session)
+        function handlePlatformLogin(e, platform) {
+            e.preventDefault();
+            const inputs = e.target.querySelectorAll('input');
+            let userIdentifier = "Active User";
+            if(inputs.length > 0 && inputs[0].value.trim()) {
+                userIdentifier = inputs[0].value.split('@')[0];
+            }
+
+            if(document.getElementById('display-fb-name') && platform === 'facebook') {
+                document.getElementById('display-fb-name').innerText = userIdentifier;
+            }
+
+            authState[platform] = true;
+            updatePlatformAuthState(platform);
+            showToast(`${platform.toUpperCase()} Login Connected for ${userIdentifier}!`, "fa-right-to-bracket text-green-400");
+        }
+
+        // Quick Demo Login (Optional for Testing)
+        function quickLogin(platform) {
+            authState[platform] = true;
+            updatePlatformAuthState(platform);
+            showToast(`${platform.toUpperCase()} Session Started!`, "fa-bolt text-yellow-400");
+        }
+
+        // Logout platform
+        function logoutPlatform(platform) {
+            authState[platform] = false;
+            updatePlatformAuthState(platform);
+            showToast(`${platform.toUpperCase()} session ended.`, "fa-circle-exclamation text-amber-500");
+        }
+
+        function logoutCurrentPlatform() {
+            logoutPlatform(currentActiveTab);
+        }
+
+        // Tab Switcher Function - Auto Hide Panel on Selection
+        function switchTab(tabName) {
+            currentActiveTab = tabName;
+            
+            // Hide all app views
+            document.querySelectorAll('.app-view').forEach(view => view.classList.add('hidden'));
+            
+            // Show selected view
+            const selectedView = document.getElementById(`view-${tabName}`);
+            if(selectedView) selectedView.classList.remove('hidden');
+
+            // Reset navigation tab styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl font-medium transition text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700/50";
+            });
+
+            // Highlight Active Button
+            const activeNav = document.getElementById(`nav-${tabName}`);
+            if(activeNav) {
+                activeNav.classList.remove('text-gray-500', 'hover:bg-gray-100', 'dark:hover:bg-gray-700/50');
+                activeNav.classList.add('bg-blue-50', 'dark:bg-gray-700', 'text-blue-600', 'dark:text-white');
+            }
+
+            // Sync Auth View State
+            updatePlatformAuthState(tabName);
+
+            // Auto-collapse sidebar after selecting a platform for clean full view
+            collapseSidebar();
+        }
+
+        // Default Initial Launch State (Clean Logged Out Screen for All Apps)
+        window.onload = function() {
+            switchTab('facebook');
+        };
+
+        // Open specific messenger conversation
+        function openMessengerChat(name, imgUrl) {
+            document.getElementById('msg-chat-name').innerText = name;
+            if(imgUrl) document.getElementById('msg-header-img').src = imgUrl;
+            showToast(`${name} ke sath Messenger chat opened!`, "fa-comments text-blue-500");
+        }
+
+        // Custom Toast Notification
+        function showToast(msg, iconClass = "fa-circle-check text-green-400") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = msg;
+            toastIcon.className = `fas ${iconClass}`;
+
+            toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-[-100px]', 'opacity-0');
+            }, 3000);
+        }
+
+        // Modal Controls
+        function openCreateModal() {
+            document.getElementById('create-modal').classList.remove('hidden');
+        }
+        function closeCreateModal() {
+            document.getElementById('create-modal').classList.add('hidden');
+        }
+
+        function publishPost() {
+            const txt = document.getElementById('modal-text').value;
+            if(!txt.trim()) {
+                showToast("Kripya kuch content likhein!", "fa-triangle-exclamation text-red-500");
+                return;
+            }
+            closeCreateModal();
+            document.getElementById('modal-text').value = '';
+            showToast("Aapka post sabhi selected platforms par live ho gaya!", "fa-paper-plane text-blue-500");
+        }
+
+        // Like Buttons Toggles
+        function toggleLike(btn) {
+            btn.classList.toggle('text-blue-600');
+            showToast("Post Liked!", "fa-thumbs-up text-blue-500");
+        }
+        function toggleInstaLike(btn) {
+            const icon = btn.querySelector('i');
+            icon.classList.toggle('fa-solid');
+            icon.classList.toggle('text-red-500');
+            showToast("Instagram Post Liked!", "fa-heart text-red-500");
+        }
+
+        // Messenger Interaction
+        function sendMsg() {
+            const input = document.getElementById('msg-input');
+            if(!input.value.trim()) return;
+
+            const body = document.getElementById('msg-chat-body');
+            const msgHtml = `
+                <div class="flex justify-end">
+                    <div class="bg-blue-600 text-white text-sm p-3 rounded-2xl rounded-br-none max-w-xs shadow">
+                        ${input.value}
+                    </div>
+                </div>`;
+            body.insertAdjacentHTML('beforeend', msgHtml);
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+        }
+
+        // WhatsApp Interaction
+        function sendWaMsg() {
+            const input = document.getElementById('wa-input');
+            if(!input.value.trim()) return;
+
+            const body = document.getElementById('wa-chat-body');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const msgHtml = `
+                <div class="flex justify-end">
+                    <div class="bg-emerald-600 text-white text-sm p-2.5 rounded-lg shadow-sm max-w-xs">
+                        ${input.value}
+                        <span class="block text-[9px] text-right text-emerald-200">${time} <i class="fa-solid fa-check-double text-blue-300"></i></span>
+                    </div>
+                </div>`;
+            body.insertAdjacentHTML('beforeend', msgHtml);
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function playVideo(title, channel) {
+            showToast(`Playing "${title}" by ${channel}`, "fa-play text-red-500");
+        }
+    </script>
+</body>
+</html>
